@@ -153,4 +153,58 @@ class Api {
       }
     }
   }
+
+  // في ملف: helper/api.dart
+
+  Future<dynamic> postImage({
+    required String url,
+    required String filePath,
+    required String fileName,
+    required String fileKey, // مثل: 'image' أو 'document'
+    Map<String, dynamic>? body, // دعم dynamic
+    String? token,
+  }) async {
+    var request = http.MultipartRequest('POST', Uri.parse(url));
+
+    // أضف التوكن
+    if (token != null) {
+      request.headers['Authorization'] = 'Bearer $token';
+    }
+
+    // أضف الملف
+    request.files.add(
+      await http.MultipartFile.fromPath(fileKey, filePath, filename: fileName),
+    );
+
+    // أضف الحقول (body) كـ fields بعد تحويل القيم إلى String
+    if (body != null) {
+      final stringFields = <String, String>{};
+      body.forEach((key, value) {
+        stringFields[key] = value.toString(); // تحويل كل قيمة إلى String
+      });
+      request.fields.addAll(stringFields);
+    }
+
+    print('Uploading to: $url');
+    print('File: $fileName');
+    print('Fields: ${body ?? 'No fields'}');
+    print('Headers: ${request.headers}');
+
+    try {
+      final response = await request.send();
+      final respStr = await response.stream.bytesToString();
+
+      print('Upload Response (${response.statusCode}): $respStr');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return jsonDecode(respStr);
+      } else {
+        final error = jsonDecode(respStr);
+        throw error['message'] ?? 'فشل رفع الملف';
+      }
+    } catch (e) {
+      print('Upload Error: $e');
+      throw 'تعذر رفع الملف: $e';
+    }
+  }
 }

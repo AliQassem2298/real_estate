@@ -2,8 +2,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:real_estate/screens/Submission_Success.dart';
 import 'package:real_estate/screens/map_picker.dart';
+import 'package:real_estate/services/create_property_service.dart';
+import 'package:real_estate/screens/Page/property_media.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AddPropertyScreen extends StatefulWidget {
   const AddPropertyScreen({super.key});
@@ -14,20 +16,182 @@ class AddPropertyScreen extends StatefulWidget {
 
 class _AddPropertyScreenState extends State<AddPropertyScreen> {
   final _formKey = GlobalKey<FormState>();
+  final CreatePropertyService _createService = CreatePropertyService();
+
   List<XFile?> images = List.filled(6, null);
   File? ownershipDocument;
 
-  String? selectedType;
-  String? selectedOwnership;
-  String? selectedStatus;
+  // Backend-driven enums mapped to ids
+  // type: ['cmmercial', 'residential', 'industrial', 'agricultural'] → ids 1..4 (example mapping)
+  final Map<String, String> _typeLabelToId = const {
+    'تجاري': '1',
+    'سكني': '2',
+    'صناعي': '3',
+    'زراعي': '4',
+  };
+  final List<String> _typeOptions = const ['تجاري', 'سكني', 'صناعي', 'زراعي'];
+
+  // subtype enum mapping
+  final Map<String, String> _subtypeLabelToId = const {
+    'بيت': '1',
+    'شقة': '2',
+    'أرض': '3',
+    'فيلا': '4',
+    'معمل': '5',
+    'مكتب': '6',
+    'محل': '7',
+    'فندق': '8',
+    'مطعم': '9',
+    'مستودع': '10',
+    'مزرعة': '11',
+    'بيت زجاجي': '12',
+  };
+  final List<String> _subtypeOptions = const [
+    'بيت',
+    'شقة',
+    'أرض',
+    'فيلا',
+    'معمل',
+    'مكتب',
+    'محل',
+    'فندق',
+    'مطعم',
+    'مستودع',
+    'مزرعة',
+    'بيت زجاجي'
+  ];
+
+  // status: 'rent' or 'sale'
+  final Map<String, String> _statusLabelToValue = const {
+    'للبيع': 'sale',
+    'إيجار': 'rent',
+    'محجوز': 'reserved',
+  };
+  final List<String> _statusOptions = const ['للبيع', 'إيجار', 'محجوز'];
+
+  String? selectedTypeLabel;
+  String? selectedSubtypeLabel;
+  String? selectedStatusLabel;
   String? selectedRooms;
   String? selectedFloors;
 
+  String? _latitude;
+  String? _longitude;
+
+  // boolean features
+  bool hasPool = false;
+  bool hasGarden = false;
+  bool hasElevator = false;
+  bool solarEnergy = false;
+
+  final TextEditingController titleController = TextEditingController();
   final TextEditingController priceController = TextEditingController();
   final TextEditingController areaController = TextEditingController();
   final TextEditingController nearbyServicesController =
       TextEditingController();
   final TextEditingController featuresController = TextEditingController();
+  final TextEditingController descriptionController = TextEditingController();
+
+  Future<void> _openMapPicker() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const MapPicker()),
+    );
+    if (result is Map && result['lat'] != null && result['lng'] != null) {
+      setState(() {
+        _latitude = result['lat'].toString();
+        _longitude = result['lng'].toString();
+      });
+    }
+  }
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final typeId = _typeLabelToId[selectedTypeLabel];
+    final subtypeId = _subtypeLabelToId[selectedSubtypeLabel];
+    final status = _statusLabelToValue[selectedStatusLabel];
+
+    if (typeId == null || subtypeId == null || status == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('يرجى اختيار النوع والفرع والحالة')),
+      );
+      return;
+    }
+
+    if (_latitude == null || _longitude == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('يرجى تحديد الموقع من الخريطة')),
+      );
+      return;
+    }
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      final created = await _createService.createProperty(
+        typeId: typeId,
+        subtypeId: subtypeId,
+        title: titleController.text.trim(),
+        status: status,
+        description: descriptionController.text.trim(),
+        price: priceController.text.trim(),
+        area: areaController.text.trim(),
+        floor: selectedFloors,
+        roomsCount: selectedRooms,
+        latitude: _latitude!,
+        longitude: _longitude!,
+        hasPool: hasPool,
+        hasGarden: hasGarden,
+        hasElevator: hasElevator,
+        solarEnergy: solarEnergy,
+        features: featuresController.text.trim().isEmpty
+            ? null
+            : featuresController.text.trim(),
+        nearbyServices: nearbyServicesController.text.trim().isEmpty
+            ? null
+            : nearbyServicesController.text.trim(),
+      );
+
+      if (!mounted) return;
+      Navigator.pop(context); // close loading
+
+      // Show success and route
+      await showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('تم إنشاء العقار'),
+          content: const Text(
+              'تم إرسال طلبك إلى الأدمن. عند الموافقة سيظهر ضمن عقاراتك.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('حسناً'),
+            )
+          ],
+        ),
+      );
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('pending_approval', true);
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (_) => PropertyMediaPage(propertyId: created.property.id)),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.pop(context); // close loading
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('فشل الإرسال: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,39 +205,30 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               buildUnifiedField(
-                title: 'النوع',
-                options: ['شقة', 'فيلا', 'أرض'],
-                selectedValue: selectedType,
-                onChanged: (val) => setState(() => selectedType = val),
+                title: 'العنوان',
+                controller: titleController,
               ),
               buildUnifiedField(
-                title: 'الملكية',
-                options: ['تمليك', 'إيجار', 'استثمار'],
-                selectedValue: selectedOwnership,
-                onChanged: (val) => setState(() => selectedOwnership = val),
+                title: 'النوع',
+                options: _typeOptions,
+                selectedValue: selectedTypeLabel,
+                onChanged: (val) => setState(() => selectedTypeLabel = val),
+              ),
+              buildUnifiedField(
+                title: 'الفرع',
+                options: _subtypeOptions,
+                selectedValue: selectedSubtypeLabel,
+                onChanged: (val) => setState(() => selectedSubtypeLabel = val),
               ),
               buildUnifiedField(
                 title: 'الحالة',
-                options: ['جديد', 'مستعمل', 'قيد الإنشاء'],
-                selectedValue: selectedStatus,
-                onChanged: (val) => setState(() => selectedStatus = val),
-              ),
-              buildUnifiedField(
-                title: 'عدد الغرف',
-                options: ['1', '2', '3', '4', '5+'],
-                selectedValue: selectedRooms,
-                onChanged: (val) => setState(() => selectedRooms = val),
-              ),
-              buildUnifiedField(
-                title: 'الطوابق',
-                options: ['أرضي', 'أول', 'ثاني', 'أكثر'],
-                selectedValue: selectedFloors,
-                onChanged: (val) => setState(() => selectedFloors = val),
+                options: _statusOptions,
+                selectedValue: selectedStatusLabel,
+                onChanged: (val) => setState(() => selectedStatusLabel = val),
               ),
               const SizedBox(height: 12),
               const Text('الموقع',
                   style: TextStyle(fontWeight: FontWeight.bold)),
-
               const SizedBox(height: 8),
               Container(
                 padding:
@@ -83,22 +238,21 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: InkWell(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const MapPicker()),
-                    );
-                  },
+                  onTap: _openMapPicker,
                   child: Row(
                     children: [
                       Icon(Icons.location_on, color: Colors.blue.shade300),
                       const SizedBox(width: 10),
-                      const Text(
-                        'ادخل موقع العقار',
-                        style: TextStyle(
-                          color: Colors.black87,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 16,
+                      Expanded(
+                        child: Text(
+                          _latitude != null && _longitude != null
+                              ? '($_latitude, $_longitude)'
+                              : 'ادخل موقع العقار',
+                          style: const TextStyle(
+                            color: Colors.black87,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                          ),
                         ),
                       ),
                     ],
@@ -110,76 +264,61 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
               buildUnifiedField(title: 'السعر', controller: priceController),
               buildUnifiedField(title: 'المساحة', controller: areaController),
               buildUnifiedField(
-                title: 'الخدمات القريبة',
-                controller: nearbyServicesController,
-              ),
+                  title: 'الخدمات القريبة',
+                  controller: nearbyServicesController),
               buildUnifiedField(
-                title: 'المميزات',
-                controller: featuresController,
-              ),
-              const SizedBox(height: 16),
-              const Text('مستندات الملكية أو صورة عن الهوية'),
+                  title: 'المميزات', controller: featuresController),
+              buildUnifiedField(
+                  title: 'الوصف', controller: descriptionController),
 
-              ElevatedButton.icon(
-                onPressed: pickDocument,
-                icon: Icon(Icons.image,
-                    color: Colors.blue.shade300), // أيقونة المعرض
-                label: const Text('اضغط لاختيار الملف (صورة أو PDF)'),
-                // style: ElevatedButton.styleFrom(
-                //   backgroundColor: Colors.blue, // لون الزر (اختياري)
-                // ),
-              ),
-
-              if (ownershipDocument != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: Text(
-                    'تم اختيار الملف: ${ownershipDocument!.path.split('/').last}',
-                    style: const TextStyle(color: Colors.blue),
-                  ),
-                ),
-
-              const SizedBox(height: 16),
-              const Text('أضف ثلاث صور على الأقل'),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: List.generate(6, (index) {
-                  return GestureDetector(
-                    onTap: () => pickImage(index),
-                    child: Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: images[index] != null
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image.file(
-                                File(images[index]!.path),
-                                fit: BoxFit.cover,
-                              ),
-                            )
-                          : Icon(
-                              Icons.add,
-                              color: Colors.blue.shade300,
-                            ), // ✅ لون أزرق هنا
+              const SizedBox(height: 12),
+              // boolean features
+              Row(
+                children: [
+                  Expanded(
+                    child: CheckboxListTile(
+                      contentPadding: EdgeInsets.zero,
+                      value: hasPool,
+                      onChanged: (v) => setState(() => hasPool = v ?? false),
+                      title: const Text('مسبح'),
                     ),
-                  );
-                }),
+                  ),
+                  Expanded(
+                    child: CheckboxListTile(
+                      contentPadding: EdgeInsets.zero,
+                      value: hasGarden,
+                      onChanged: (v) => setState(() => hasGarden = v ?? false),
+                      title: const Text('حديقة'),
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    child: CheckboxListTile(
+                      contentPadding: EdgeInsets.zero,
+                      value: hasElevator,
+                      onChanged: (v) =>
+                          setState(() => hasElevator = v ?? false),
+                      title: const Text('مصعد'),
+                    ),
+                  ),
+                  Expanded(
+                    child: CheckboxListTile(
+                      contentPadding: EdgeInsets.zero,
+                      value: solarEnergy,
+                      onChanged: (v) =>
+                          setState(() => solarEnergy = v ?? false),
+                      title: const Text('طاقة شمسية'),
+                    ),
+                  ),
+                ],
               ),
 
               const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => const SubmissionSuccess()),
-                  );
-                },
+                onPressed: _submit,
                 child: const Text('تأكيد'),
               ),
             ],
@@ -204,20 +343,11 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
         borderRadius: BorderRadius.circular(12),
       ),
       child: options != null
-          ? ExpansionTile(
-              title: Text(
-                selectedValue ?? title,
-                style: const TextStyle(
-                  color: Colors.black87,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              children: options.map((option) {
-                return ListTile(
-                  title: Text(option),
-                  onTap: () => onChanged?.call(option),
-                );
-              }).toList(),
+          ? _DropdownTile(
+              title: title,
+              options: options,
+              selectedValue: selectedValue,
+              onChanged: onChanged,
             )
           : TextFormField(
               controller: controller,
@@ -226,6 +356,16 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
                 border: InputBorder.none,
                 hintText: 'أدخل $title',
               ),
+              validator: (v) {
+                if (controller == titleController ||
+                    controller == priceController ||
+                    controller == areaController) {
+                  if (v == null || v.trim().isEmpty) {
+                    return 'هذا الحقل مطلوب';
+                  }
+                }
+                return null;
+              },
             ),
     );
   }
@@ -249,5 +389,46 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
         ownershipDocument = File(result.files.single.path!);
       });
     }
+  }
+}
+
+class _DropdownTile extends StatefulWidget {
+  final String title;
+  final List<String> options;
+  final String? selectedValue;
+  final Function(String?)? onChanged;
+  const _DropdownTile(
+      {required this.title,
+      required this.options,
+      this.selectedValue,
+      this.onChanged});
+
+  @override
+  State<_DropdownTile> createState() => _DropdownTileState();
+}
+
+class _DropdownTileState extends State<_DropdownTile> {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return ExpansionTile(
+      initiallyExpanded: _expanded,
+      onExpansionChanged: (v) => setState(() => _expanded = v),
+      title: Text(
+        widget.selectedValue ?? widget.title,
+        style:
+            const TextStyle(color: Colors.black87, fontWeight: FontWeight.w600),
+      ),
+      children: widget.options.map((option) {
+        return ListTile(
+          title: Text(option),
+          onTap: () {
+            widget.onChanged?.call(option);
+            setState(() => _expanded = false);
+          },
+        );
+      }).toList(),
+    );
   }
 }

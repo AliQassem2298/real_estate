@@ -5,7 +5,6 @@ import 'package:real_estate/screens/auth/login.dart';
 import 'package:real_estate/screens/home.dart';
 import 'package:real_estate/services/Delete_Account_service.dart';
 import 'package:real_estate/services/profile_service.dart';
-import 'package:real_estate/widgets/auth/bouttom_auth.dart';
 import 'package:real_estate/widgets/auth/custom_input_field.dart';
 
 class Profile extends StatefulWidget {
@@ -142,9 +141,9 @@ class _ProfileState extends State<Profile> {
               const Text("تم حذف حسابك بنجاح. سيتم توجيهك إلى شاشة التسجيل."),
           actions: [
             TextButton(
-              onPressed: () {
-                // حذف التوكن
-                sharedPreferences!.remove("token");
+              onPressed: () async {
+                // حذف كل البيانات
+                await clearUserSession();
                 // العودة إلى شاشة التسجيل
                 Navigator.pushReplacement(
                     context,

@@ -3,11 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:real_estate/constans/image_url.dart';
 import 'package:real_estate/crud.dart';
 import 'package:real_estate/function/validators.dart';
-import 'package:real_estate/main.dart';
 import 'package:real_estate/screens/auth/forget_password/resetpassword.dart';
 import 'package:real_estate/screens/auth/signup.dart';
-import 'package:real_estate/screens/home.dart';
-import 'package:real_estate/services/Reset_Password_service.dart';
 import 'package:real_estate/widgets/auth/bottum_go.dart';
 import 'package:real_estate/widgets/auth/bouttom_auth.dart';
 import '../../blocs/auth/login/login_cubit.dart';
@@ -40,19 +37,19 @@ class _LoginState extends State<Login> {
     return BlocProvider(
       create: (_) => LoginCubit(Crud()),
       child: Scaffold(
-        appBar: AppBar(
-          actions: [
-            IconButton(
-                onPressed: () async {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const Home()),
-                  );
-                  print("${sharedPreferences!.getString("token")}");
-                },
-                icon: const Icon(Icons.abc))
-          ],
-        ),
+        // appBar: AppBar(
+        //   actions: [
+        //     IconButton(
+        //         onPressed: () async {
+        //           Navigator.push(
+        //             context,
+        //             MaterialPageRoute(builder: (context) => const Home()),
+        //           );
+        //           print("${sharedPreferences!.getString("token")}");
+        //         },
+        //         icon: const Icon(Icons.abc))
+        //   ],
+        // ),
         backgroundColor: Colors.white,
         body: BlocConsumer<LoginCubit, LoginState>(
           listener: (context, state) {

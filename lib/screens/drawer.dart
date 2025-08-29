@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:real_estate/main.dart';
+import 'package:real_estate/screens/Page/MyPropertiesScreen.dart';
 import 'package:real_estate/screens/auth/login.dart';
 import 'package:real_estate/services/logout_service.dart';
-import 'page/my_properties.dart';
-import 'page/notifications.dart';
 import 'page/offices.dart';
 // import 'page/comparison.dart';
-import 'page/chat.dart';
-import 'page/invoices.dart';
-import 'page/sold_properties.dart';
 import 'package:real_estate/screens/page/maintenance.dart';
 import 'page/wallet.dart';
+import 'page/banks.dart';
 
 Drawer buildDrawer(BuildContext context) {
   return Drawer(
@@ -29,14 +26,14 @@ Drawer buildDrawer(BuildContext context) {
           ),
 
           buildDrawerItem(
-              Icons.home, 'عقاراتي', context, const MyPropertiesPage(),
+              Icons.home, 'عقاراتي', context, const MyPropertiesScreen(),
               iconColor: Colors.blue),
-          buildDrawerItem(Icons.notifications, 'الإشعارات', context,
-              const NotificationsPage(),
-              iconColor: Colors.blue),
-          buildDrawerItem(
-              Icons.business, 'المكاتب الوسيطة', context, const OfficesPage(),
-              iconColor: Colors.blue),
+          // buildDrawerItem(Icons.notifications, 'الإشعارات', context,
+          //     const NotificationsPage(),
+          //     iconColor: Colors.blue),
+          // buildDrawerItem(
+          //     Icons.business, 'المكاتب الوسيطة', context, const OfficesPage(),
+          //     iconColor: Colors.blue),
           // buildDrawerItem(
           //   Icons.compare_arrows,
           //   'المقارنة',
@@ -44,20 +41,26 @@ Drawer buildDrawer(BuildContext context) {
           //   ComparisonPage(),
           //   iconColor: Colors.blue
           // ),
-          buildDrawerItem(Icons.chat, 'المراسلة', context, const ChatListPage(),
-              iconColor: Colors.blue),
-          buildDrawerItem(
-              Icons.receipt_long, 'فواتيري', context, const InvoicesPage(),
-              iconColor: Colors.blue),
-          buildDrawerItem(Icons.verified, 'العقارات المباعة', context,
-              const SoldPropertiesPage(),
-              iconColor: Colors.blue),
-          buildDrawerItem(Icons.home_repair_service, 'مكاتب الصيانة', context,
+          // buildDrawerItem(Icons.chat, 'المراسلة', context, const ChatListPage(),
+          //     iconColor: Colors.blue),
+          // buildDrawerItem(
+          //     Icons.receipt_long, 'فواتيري', context, const InvoicesPage(),
+          //     iconColor: Colors.blue),
+          // buildDrawerItem(Icons.verified, 'العقارات المباعة', context,
+          //     const SoldPropertiesPage(),
+          //     iconColor: Colors.blue),
+          buildDrawerItem(Icons.home_repair_service, 'ورشات الصيانة', context,
               const MaintenancePage(),
               iconColor: Colors.blue),
           buildDrawerItem(Icons.account_balance_wallet, 'محفظتي', context,
               const WalletPage(),
               iconColor: Colors.blue),
+          // buildDrawerItem(
+          //     Icons.account_balance, 'البنوك', context, const BanksPage(),
+          //     iconColor: Colors.blue),
+          // buildDrawerItem(Icons.filter_alt, 'بحث متقدم', context,
+          //     const FilterPropertiesPage(),
+          // iconColor: Colors.blue),
           const Divider(),
 
           ListTile(
@@ -84,7 +87,7 @@ Drawer buildDrawer(BuildContext context) {
 
               try {
                 final service = LogoutService();
-                final result = await service.logout();
+                await service.logout();
 
                 // إغلاق التحميل
                 Navigator.pop(context);
@@ -97,8 +100,8 @@ Drawer buildDrawer(BuildContext context) {
                   ),
                 );
 
-                // حذف التوكن
-                sharedPreferences!.remove("token");
+                // حذف كل البيانات المحلية
+                await clearUserSession();
 
                 // التوجيه إلى الصفحة الرئيسية
                 Navigator.pushReplacement(

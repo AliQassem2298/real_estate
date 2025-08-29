@@ -1,377 +1,17 @@
-// import 'package:flutter/material.dart';
-// import 'package:real_estate/constans/image_url.dart';
-// import 'package:real_estate/screens/custom_drawer.dart';
-
-// class Home extends StatefulWidget {
-//   Home({Key? key}) : super(key: key);
-
-//   @override
-//   State<Home> createState() => _HomeState();
-// }
-
-// class _HomeState extends State<Home> {
-//   final List<Map<String, dynamic>> houses = List.generate(6, (index) => {
-//     'image': AppImageAsset.onboarding1,
-//     'title': 'فيلا',
-//     'location': 'دمشق/برامكة',
-//     'rating': 4.9,
-//     'status': index % 2 == 0 ? 'للبيع' : 'إيجار',
-//   });
-
-//   String selectedFilter = 'الكل';
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-
-//       backgroundColor: Colors.white,
-//       endDrawer: Drawer(), // يسحب من اليمين
-//       appBar: PreferredSize(
-//         preferredSize: Size.fromHeight(120),
-//         child: Stack(
-//           children: [
-//             Container(
-//               padding: EdgeInsets.only(top: 70, left: 16, right: 16),
-//               color: Colors.white,
-//               child: Row(
-//                 children: [
-//                   Container(
-//                     decoration: BoxDecoration(
-//                       color: Colors.blue[50],
-//                       shape: BoxShape.circle,
-//                     ),
-//                     padding: EdgeInsets.all(14),
-//                     child: Icon(Icons.person, color: Colors.blue, size: 28),
-//                   ),
-//                   SizedBox(width: 10),
-//                   Column(
-//                     crossAxisAlignment: CrossAxisAlignment.start,
-//                     children: [
-//                       Text(
-//                         'مرحبا !',
-//                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-//                       ),
-//                       Text(
-//                         'اسم المستخدم',
-//                         style: TextStyle(fontSize: 16),
-//                       ),
-//                     ],
-//                   ),
-//                 ],
-//               ),
-//             ),
-//             Positioned(
-//               top: 40,
-//               left: 16,
-//               child: Builder(
-//                 builder: (context) => InkWell(
-//                   onTap: () => Scaffold.of(context).openEndDrawer(),
-//                   borderRadius: BorderRadius.circular(50),
-//                   child: Container(
-//                     padding: EdgeInsets.all(10),
-//                     decoration: BoxDecoration(
-//                       color: Colors.blue.withOpacity(0.1),
-//                       shape: BoxShape.circle,
-//                       boxShadow: [
-//                         BoxShadow(
-//                           color: Colors.black.withOpacity(0.05),
-//                           blurRadius: 4,
-//                           offset: Offset(0, 2),
-//                         )
-//                       ],
-//                     ),
-//                     child: Icon(Icons.menu, color: Colors.blue, size: 24),
-//                   ),
-//                 ),
-//               ),
-//             ),
-//           ],
-//         ),
-//       ),
-//       body: SingleChildScrollView(
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             // مربع البحث
-//             Padding(
-//               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-//               child: Container(
-//                 decoration: BoxDecoration(
-//                   color: Colors.white,
-//                   borderRadius: BorderRadius.circular(12),
-//                   boxShadow: [
-//                     BoxShadow(
-//                       color: Colors.grey.withOpacity(0.1),
-//                       blurRadius: 6,
-//                       offset: Offset(0, 2),
-//                     )
-//                   ],
-//                 ),
-//                 child: TextField(
-//                   decoration: InputDecoration(
-//                     hintText: 'بحث',
-//                     hintStyle: TextStyle(color: Colors.grey[400]),
-//                     prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
-//                     border: InputBorder.none,
-//                     contentPadding: EdgeInsets.symmetric(vertical: 14),
-//                   ),
-//                 ),
-//               ),
-//             ),
-
-//             // عنوان عروض اليوم
-//             Padding(
-//               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-//               child: Row(
-//                 children: [
-//                   Container(
-//                     decoration: BoxDecoration(
-//                       color: Colors.blue.withOpacity(0.1),
-//                       shape: BoxShape.circle,
-//                     ),
-//                     padding: EdgeInsets.all(6),
-//                     child: Icon(Icons.star, color: Colors.blue, size: 20),
-//                   ),
-//                   SizedBox(width: 8),
-//                   Text(
-//                     'عروض اليوم',
-//                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-//                   ),
-//                 ],
-//               ),
-//             ),
-
-//             SizedBox(height: 10),
-
-//             // بطاقات العقارات
-//             SizedBox(
-//               height: 230,
-//               child: ListView.builder(
-//                 scrollDirection: Axis.horizontal,
-//                 padding: EdgeInsets.symmetric(horizontal: 16),
-//                 itemCount: houses.length,
-//                 itemBuilder: (context, index) {
-//                   return houseCard(houses[index]);
-//                 },
-//               ),
-//             ),
-
-//             SizedBox(height: 20),
-
-//             // Tabs (الكل، بيع، إيجار)
-//             Padding(
-//               padding: const EdgeInsets.symmetric(horizontal: 16),
-//               child: Row(
-//                 children: [
-//                   Text(
-//                     'الأحدث',
-//                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-//                   ),
-//                   Spacer(),
-//                   filterButton('الكل'),
-//                   SizedBox(width: 8),
-//                   filterButton('بيع'),
-//                   SizedBox(width: 8),
-//                   filterButton('إيجار'),
-//                 ],
-//               ),
-//             ),
-
-//             SizedBox(height: 10),
-
-//             // شبكة العقارات
-//             GridView.builder(
-//               shrinkWrap: true,
-//               physics: NeverScrollableScrollPhysics(),
-//               itemCount: houses.length,
-//               padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-//               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-//                 crossAxisCount: 2,
-//                 crossAxisSpacing: 12,
-//                 mainAxisSpacing: 12,
-//                 childAspectRatio: 0.78,
-//               ),
-//               itemBuilder: (context, index) {
-//                 return houseCard(houses[index]);
-//               },
-//             ),
-//           ],
-//         ),
-//       ),
-
-//       // شريط التنقل السفلي
-//       bottomNavigationBar: BottomAppBar(
-//         shape: CircularNotchedRectangle(),
-//         notchMargin: 8,
-//         child: Row(
-//           mainAxisAlignment: MainAxisAlignment.spaceAround,
-//           children: [
-//             IconButton(icon: Icon(Icons.favorite_border), onPressed: () {}),
-//             SizedBox(width: 48),
-//             IconButton(icon: Icon(Icons.person), onPressed: () {}),
-//           ],
-//         ),
-//       ),
-
-//       floatingActionButton: Container(
-//         decoration: BoxDecoration(
-//           shape: BoxShape.circle,
-//           boxShadow: [
-//             BoxShadow(
-//               color: Colors.blue.withOpacity(0.3),
-//               blurRadius: 10,
-//               offset: Offset(0, 5),
-//             )
-//           ],
-//         ),
-//         child: FloatingActionButton(
-//           onPressed: () {},
-//           backgroundColor: Colors.blue,
-//           child: Icon(Icons.add, size: 28),
-//         ),
-//       ),
-//       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-//     );
-//   }
-
-//   // زر الفلاتر (الكل / بيع / إيجار)
-//   Widget filterButton(String label) {
-//     bool isSelected = selectedFilter == label;
-//     return InkWell(
-//       onTap: () {
-//         setState(() {
-//           selectedFilter = label;
-//         });
-//       },
-//       borderRadius: BorderRadius.circular(20),
-//       child: Container(
-//         decoration: BoxDecoration(
-//           color: isSelected ? Colors.blue : Colors.grey[200],
-//           borderRadius: BorderRadius.circular(20),
-//         ),
-//         padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-//         child: Text(
-//           label,
-//           style: TextStyle(color: isSelected ? Colors.white : Colors.black),
-//         ),
-//       ),
-//     );
-//   }
-
-//   // بطاقة العقار
-//   Widget houseCard(Map<String, dynamic> data) {
-//     return Container(
-//       width: 180,
-//       margin: EdgeInsets.only(right: 12),
-//       decoration: BoxDecoration(
-//         borderRadius: BorderRadius.circular(15),
-//         color: Colors.white,
-//         boxShadow: [
-//           BoxShadow(
-//             color: Colors.grey.withOpacity(0.1),
-//             spreadRadius: 2,
-//             blurRadius: 5,
-//           )
-//         ],
-//       ),
-//       child: Column(
-//         crossAxisAlignment: CrossAxisAlignment.start,
-//         children: [
-//           Stack(
-//             children: [
-//               ClipRRect(
-//                 borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
-//                 child: Image.asset(
-//                   data['image'],
-//                   height: 120,
-//                   width: double.infinity,
-//                   fit: BoxFit.cover,
-//                 ),
-//               ),
-//               // حالة العقار (للبيع / إيجار)
-//               Positioned(
-//                 top: 8,
-//                 right: 8,
-//                 child: Container(
-//                   padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-//                   decoration: BoxDecoration(
-//                     color: Colors.blue,
-//                     borderRadius: BorderRadius.circular(12),
-//                   ),
-//                   child: Text(
-//                     data['status'],
-//                     style: TextStyle(color: Colors.white, fontSize: 12),
-//                   ),
-//                 ),
-//               ),
-//               // زر المفضلة أعلى اليسار
-//               Positioned(
-//                 top: 8,
-//                 left: 8,
-//                 child: Container(
-//                   decoration: BoxDecoration(
-//                     color: Colors.white.withOpacity(0.9),
-//                     shape: BoxShape.circle,
-//                   ),
-//                   child: IconButton(
-//                     icon: Icon(Icons.favorite_border, color: Colors.red),
-//                     onPressed: () {
-//                       // حدث عند الضغط على المفضلة
-//                     },
-//                   ),
-//                 ),
-//               ),
-//             ],
-//           ),
-//           Padding(
-//             padding: const EdgeInsets.all(8.0),
-//             child: Column(
-//               crossAxisAlignment: CrossAxisAlignment.start,
-//               children: [
-//                 Text(data['title'], style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-//                 SizedBox(height: 5),
-//                 Row(
-//                   children: [
-//                     Icon(Icons.location_on, size: 14, color: Colors.grey),
-//                     SizedBox(width: 3),
-//                     Expanded(
-//                       child: Text(
-//                         data['location'],
-//                         style: TextStyle(fontSize: 12, color: Colors.grey),
-//                         overflow: TextOverflow.ellipsis,
-//                       ),
-//                     ),
-//                   ],
-//                 ),
-//                 SizedBox(height: 5),
-//                 Row(
-//                   children: [
-//                     Icon(Icons.star, size: 14, color: Colors.amber),
-//                     SizedBox(width: 3),
-//                     Text('${data['rating']}', style: TextStyle(fontSize: 12)),
-//                   ],
-//                 ),
-//               ],
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }
-
 import 'package:flutter/material.dart';
 import 'package:real_estate/constans/image_url.dart';
+import 'package:real_estate/helper/api.dart';
 import 'package:real_estate/main.dart';
-import 'package:real_estate/screens/drawer.dart'; // ✅ القائمة الجانبية
-import 'package:real_estate/screens/Page/favorites.dart';
-import 'package:real_estate/screens/Page/profile.dart'; // ✅ شاشة البروفايل
+import 'package:real_estate/models/Public_List_Approved_model.dart';
+import 'package:real_estate/screens/Page/profile.dart';
 import 'package:real_estate/screens/add_property.dart';
-import 'package:real_estate/services/Delete%20Property_service.dart';
-import 'package:real_estate/services/UpdatePropertyService.dart';
-import 'package:real_estate/services/create_property_service.dart';
-import 'package:real_estate/services/logout_service.dart';
-import 'package:real_estate/services/profile_service.dart'; // ✅ شاشة إضافة العقار
+import 'package:real_estate/screens/drawer.dart';
+import 'package:real_estate/screens/favorites_screen.dart';
+import 'package:real_estate/screens/property_detail_screen.dart';
+import 'package:real_estate/services/Public_List_Approved_service.dart';
+import 'package:real_estate/services/add_Favorite_service.dart';
+import 'package:real_estate/services/appointment_service.dart';
+import 'package:real_estate/services/delete_favorite_service.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -381,23 +21,92 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  final List<Map<String, dynamic>> houses = List.generate(
-      6,
-      (index) => {
-            'image': AppImageAsset.onboarding1,
-            'title': 'فيلا',
-            'location': 'دمشق/برامكة',
-            'rating': 4.9,
-            'status': index % 2 == 0 ? 'للبيع' : 'إيجار',
-          });
+  Set<int> _favoriteIds = {};
+  final PublicListApprovedService _service = PublicListApprovedService();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  String selectedFilter = 'الكل';
+  @override
+  void initState() {
+    super.initState();
+    _loadFavorites();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final pending = sharedPreferences!.getBool('pending_approval') ?? false;
+      if (pending && mounted) {
+        sharedPreferences!.remove('pending_approval');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content:
+                  Text('تم إرسال طلبك إلى الأدمن. سيظهر العقار بعد الموافقة.')),
+        );
+        setState(() {});
+      }
+    });
+  }
+
+  Future<void> _loadFavorites() async {
+    final prefs = sharedPreferences!.getStringList('favorite_ids') ?? [];
+    if (mounted) {
+      setState(() {
+        _favoriteIds = prefs.map(int.parse).toSet();
+      });
+    }
+  }
+
+  Future<void> _saveFavorites() async {
+    final prefs = _favoriteIds.map((id) => id.toString()).toList();
+    await sharedPreferences!.setStringList('favorite_ids', prefs);
+  }
+
+  Future<void> _toggleFavorite(int propertyId) async {
+    final isFavorite = _favoriteIds.contains(propertyId);
+
+    try {
+      if (isFavorite) {
+        await DeleteFavoriteService().deleteFavorite(id: propertyId);
+        _favoriteIds.remove(propertyId);
+      } else {
+        await AddFavoriteService().addFavorite(propertyId: propertyId);
+        _favoriteIds.add(propertyId);
+      }
+      await _saveFavorites();
+      if (mounted) {
+        setState(() {});
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("حدث خطأ: $e")),
+        );
+      }
+    }
+  }
+
+  Future<PublicListApprovedModel> _fetchProperties() async {
+    return await _service.publicListApproved();
+  }
+
+  // ✅ دالة لاستقبال التحديث من المفضلة
+  Future<void> _openFavoritesPage() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const FavoritesPage()),
+    );
+    if (result == true) {
+      // ✅ تم تحديث المفضلة، نعيد التحميل
+      await _loadFavorites();
+      if (mounted) {
+        setState(() {});
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: Colors.white,
-      endDrawer: buildDrawer(context), // ✅ القائمة الجانبية
+      extendBody: true,
+      endDrawer: buildDrawer(context),
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(120),
         child: Stack(
@@ -407,48 +116,18 @@ class _HomeState extends State<Home> {
               color: Colors.white,
               child: Row(
                 children: [
-                  IconButton(
-                    onPressed: () async {
-                      // CreatePropertyService().createProperty(
-                      //   typeId: "1",
-                      //   subtypeId: "1",
-                      //   title: "شقة فاخرة للإيجار",
-                      //   status: "rent",
-                      //   description: "شقة جديدة مفروشة بالكامل في وسط المدينة",
-                      //   price: "1500",
-                      //   area: "120",
-                      //   floor: "3",
-                      //   roomsCount: "3",
-                      //   latitude: "33.8869",
-                      //   longitude: "35.4955",
-                      //   hasPool: false,
-                      //   hasGarden: false,
-                      //   hasElevator: true,
-                      //   solarEnergy: true,
-                      //   features: "مطبخ مفتوح، بلكونة",
-                      //   nearbyServices: "مطاعم، مدارس، مستشفى",
-                      // );
-
-                      // UpdatePropertyService().updateProperty(
-                      //   id: 1, // مثلاً
-                      //   typeId: "1",
-                      //   subtypeId: "1",
-                      //   title: "qwe",
-                      //   status: "sale",
-                      //   description: "zxczxczxc",
-                      //   price: "50000000",
-                      //   area: "50",
-                      //   floor: "9",
-                      //   roomsCount: "5",
-                      //   latitude: "20",
-                      //   longitude: "50",
-                      // );
-
-                      DeletepropertyService().deleteproperty(id: 2);
-                      print("${sharedPreferences!.getString("token")}");
-                    },
-                    icon: const Icon(Icons.abc),
-                  ),
+                  // IconButton(
+                  //   onPressed: () async {
+                  //     // sharedPreferences!.clear();
+                  //     AppointmentService().createAppointment(
+                  //         mediatorId: 1,
+                  //         date: '2025-02-02',
+                  //         time: '10:20',
+                  //         propertyId: 1);
+                  //     print("${sharedPreferences!.getString("token")}");
+                  //   },
+                  //   icon: const Icon(Icons.abc),
+                  // ),
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.blue[50],
@@ -462,42 +141,40 @@ class _HomeState extends State<Home> {
                   const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'مرحبا !',
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        'اسم المستخدم',
-                        style: TextStyle(fontSize: 16),
-                      ),
+                      Text('مرحبا بك !',
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold)),
+                      Text('في عقاري', style: TextStyle(fontSize: 16)),
                     ],
                   ),
                 ],
               ),
             ),
+            // ✅ زر القائمة
             Positioned(
               top: 40,
               left: 16,
-              child: Builder(
-                builder: (context) => InkWell(
-                  onTap: () => Scaffold.of(context).openEndDrawer(),
-                  borderRadius: BorderRadius.circular(50),
-                  child: Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.1),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        )
-                      ],
-                    ),
-                    child: const Icon(Icons.menu, color: Colors.blue, size: 24),
+              child: InkWell(
+                onTap: () {
+                  if (mounted) {
+                    _scaffoldKey.currentState?.openEndDrawer();
+                  }
+                },
+                borderRadius: BorderRadius.circular(50),
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      )
+                    ],
                   ),
+                  child: const Icon(Icons.menu, color: Colors.blue, size: 24),
                 ),
               ),
             ),
@@ -508,33 +185,35 @@ class _HomeState extends State<Home> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // مربع البحث
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.1),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
-                    )
-                  ],
-                ),
-                child: TextField(
-                  decoration: InputDecoration(
-                    hintText: 'بحث',
-                    hintStyle: TextStyle(color: Colors.grey[400]),
-                    prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                ),
-              ),
+            const SizedBox(
+              height: 35,
             ),
-
+            // مربع البحث
+            // Padding(
+            //   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            //   child: Container(
+            //     decoration: BoxDecoration(
+            //       color: Colors.white,
+            //       borderRadius: BorderRadius.circular(12),
+            //       boxShadow: [
+            //         BoxShadow(
+            //           color: Colors.grey.withOpacity(0.1),
+            //           blurRadius: 6,
+            //           offset: const Offset(0, 2),
+            //         )
+            //       ],
+            //     ),
+            //     child: TextField(
+            //       decoration: InputDecoration(
+            //         hintText: 'بحث',
+            //         hintStyle: TextStyle(color: Colors.grey[400]),
+            //         prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
+            //         border: InputBorder.none,
+            //         contentPadding: const EdgeInsets.symmetric(vertical: 14),
+            //       ),
+            //     ),
+            //   ),
+            // ),
             // عنوان عروض اليوم
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -549,103 +228,136 @@ class _HomeState extends State<Home> {
                     child: const Icon(Icons.star, color: Colors.blue, size: 20),
                   ),
                   const SizedBox(width: 8),
-                  const Text(
-                    'عروض اليوم',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                  ),
+                  const Text('عروض اليوم',
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
                 ],
               ),
             ),
-
             const SizedBox(height: 10),
-
-            // بطاقات العقارات
+            // عرض العقارات
             SizedBox(
               height: 230,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: houses.length,
-                itemBuilder: (context, index) {
-                  return houseCard(houses[index]);
+              child: FutureBuilder<PublicListApprovedModel>(
+                future: _fetchProperties(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text("خطأ: ${snapshot.error}"));
+                  } else if (!snapshot.hasData) {
+                    return const Center(child: Text("لا توجد بيانات"));
+                  }
+
+                  final properties = snapshot.data!.data;
+
+                  return ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: properties.length,
+                    itemBuilder: (context, index) {
+                      final property = properties[index];
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  PropertyDetailScreen(propertyId: property.id),
+                            ),
+                          );
+                        },
+                        child: _houseCard(property, property.id),
+                      );
+                    },
+                  );
                 },
               ),
             ),
-
             const SizedBox(height: 20),
-
-            // Tabs (الكل، بيع، إيجار)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+            // Tabs
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 children: [
-                  const Text(
-                    'الأحدث',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
-                  const Spacer(),
-                  filterButton('الكل'),
-                  const SizedBox(width: 8),
-                  filterButton('بيع'),
-                  const SizedBox(width: 8),
-                  filterButton('إيجار'),
+                  Text('الأحدث',
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  Spacer(),
+                  // _filterButton('الكل'),
+                  // const SizedBox(width: 8),
+                  // _filterButton('بيع'),
+                  // const SizedBox(width: 8),
+                  // _filterButton('إيجار'),
                 ],
               ),
             ),
-
             const SizedBox(height: 10),
-
             // شبكة العقارات
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: houses.length,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 0.78,
-              ),
-              itemBuilder: (context, index) {
-                return houseCard(houses[index]);
-              },
-            ),
-          ],
-        ),
-      ),
+            FutureBuilder<PublicListApprovedModel>(
+              future: _fetchProperties(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text("خطأ: ${snapshot.error}"));
+                } else if (!snapshot.hasData) {
+                  return const Center(child: Text("لا توجد بيانات"));
+                }
 
-      // ✅ شريط التنقل السفلي
-      bottomNavigationBar: BottomAppBar(
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 8,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.favorite_border),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const FavoritesPage()),
-                );
-              },
-            ),
-            const SizedBox(width: 48),
-            IconButton(
-              icon: const Icon(Icons.person),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const Profile()),
+                final properties = snapshot.data!.data;
+
+                return GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: properties.length,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                    childAspectRatio: 0.78,
+                  ),
+                  itemBuilder: (context, index) {
+                    final property = properties[index];
+                    return _houseCard(property, property.id);
+                  },
                 );
               },
             ),
           ],
         ),
       ),
-
-      // ✅ زر إضافة عقار
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Material(
+          elevation: 8,
+          color: Colors.white,
+          child: SizedBox(
+            height: kToolbarHeight,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.favorite_border),
+                  onPressed: _openFavoritesPage, // ✅ استخدم الدالة الجديدة
+                ),
+                const SizedBox(width: 48),
+                IconButton(
+                  icon: const Icon(Icons.person),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const Profile()),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
       floatingActionButton: Container(
         decoration: BoxDecoration(
           shape: BoxShape.circle,
@@ -665,144 +377,178 @@ class _HomeState extends State<Home> {
             );
           },
           backgroundColor: Colors.blue,
+          heroTag: 'home_fab',
           child: const Icon(Icons.add, size: 28),
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 
-  // زر الفلاتر (الكل / بيع / إيجار)
-  Widget filterButton(String label) {
-    bool isSelected = selectedFilter == label;
+  Widget _filterButton(String label) {
     return InkWell(
-      onTap: () {
-        setState(() {
-          selectedFilter = label;
-        });
-      },
+      onTap: () {},
       borderRadius: BorderRadius.circular(20),
       child: Container(
         decoration: BoxDecoration(
-          color: isSelected ? Colors.blue : Colors.grey[200],
+          color: Colors.blue,
           borderRadius: BorderRadius.circular(20),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         child: Text(
           label,
-          style: TextStyle(color: isSelected ? Colors.white : Colors.black),
+          style: const TextStyle(color: Colors.white),
         ),
       ),
     );
   }
 
-  // بطاقة العقار
-  Widget houseCard(Map<String, dynamic> data) {
-    return Container(
-      width: 180,
-      margin: const EdgeInsets.only(right: 12),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(15),
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 2,
-            blurRadius: 5,
-          )
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(15)),
-                child: Image.asset(
-                  data['image'],
-                  height: 120,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              // حالة العقار (للبيع / إيجار)
-              Positioned(
-                top: 8,
-                right: 8,
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: Colors.blue,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    data['status'],
-                    style: const TextStyle(color: Colors.white, fontSize: 12),
-                  ),
-                ),
-              ),
-              // زر المفضلة أعلى اليسار
-              Positioned(
-                top: 8,
-                left: 8,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.9),
-                    shape: BoxShape.circle,
-                  ),
-                  child: IconButton(
-                    icon: const Icon(Icons.favorite_border, color: Colors.red),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => const FavoritesPage()),
-                      );
-                    },
-                  ),
-                ),
-              ),
-            ],
+  Widget _houseCard(PropertyModel property, int propertyId) {
+    final isFavorite = _favoriteIds.contains(propertyId);
+    final imageUrl = property.images.isNotEmpty
+        ? '$baseUrlImage${property.images.first.imagePath}'
+        : null;
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => PropertyDetailScreen(propertyId: propertyId),
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+        );
+      },
+      child: Container(
+        width: 180,
+        margin: const EdgeInsets.only(right: 12),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15),
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              spreadRadius: 2,
+              blurRadius: 5,
+            )
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Stack(
               children: [
-                Text(data['title'],
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 16)),
-                const SizedBox(height: 5),
-                Row(
-                  children: [
-                    const Icon(Icons.location_on, size: 14, color: Colors.grey),
-                    const SizedBox(width: 3),
-                    Expanded(
-                      child: Text(
-                        data['location'],
-                        style:
-                            const TextStyle(fontSize: 12, color: Colors.grey),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
+                // الصورة
+                ClipRRect(
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(15)),
+                  child: imageUrl != null
+                      ? Image.network(
+                          imageUrl,
+                          height: 120,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Image.asset(
+                            AppImageAsset.onboarding1,
+                            height: 120,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                      : Image.asset(
+                          AppImageAsset.onboarding1,
+                          height: 120,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                        ),
                 ),
-                const SizedBox(height: 5),
-                Row(
-                  children: [
-                    const Icon(Icons.star, size: 14, color: Colors.amber),
-                    const SizedBox(width: 3),
-                    Text('${data['rating']}',
-                        style: const TextStyle(fontSize: 12)),
-                  ],
+                // حالة العقار: للبيع / إيجار
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.blue,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      property.status == 'sale'
+                          ? 'للبيع'
+                          : property.status == 'rent'
+                              ? 'إيجار'
+                              : 'محجوز',
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                    ),
+                  ),
+                ),
+                // زر المفضلة
+                Positioned(
+                  top: 8,
+                  left: 8,
+                  child: IconButton(
+                    icon: Icon(
+                      isFavorite ? Icons.favorite : Icons.favorite_border,
+                      color: isFavorite ? Colors.red : Colors.white,
+                      size: 24,
+                    ),
+                    onPressed: () => _toggleFavorite(propertyId),
+                  ),
                 ),
               ],
             ),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // العنوان
+                  Text(
+                    property.title,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 16),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 5),
+                  // المساحة ونوع العقار
+                  Row(
+                    children: [
+                      const Icon(Icons.location_on,
+                          size: 14, color: Colors.grey),
+                      const SizedBox(width: 3),
+                      Expanded(
+                        child: Text(
+                          '${property.area} م² - ${property.type.type}',
+                          style:
+                              const TextStyle(fontSize: 12, color: Colors.grey),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 5),
+                  // عدد الغرف والسعر
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '${property.roomsCount ?? 0} غرف',
+                        style:
+                            const TextStyle(fontSize: 12, color: Colors.blue),
+                      ),
+                      Text(
+                        '${property.price.toString()} ريال',
+                        style:
+                            const TextStyle(fontSize: 12, color: Colors.blue),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

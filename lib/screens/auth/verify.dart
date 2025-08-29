@@ -5,7 +5,6 @@ import '../../blocs/auth/verify/otp_cubit.dart';
 import '../../blocs/auth/verify/verify_cubit.dart';
 import '../../blocs/auth/verify/verify_state.dart';
 import '../../constans/image_url.dart';
-import '../../constans/routes.dart';
 import '../../crud.dart';
 import '../../widgets/auth/bouttom_auth.dart';
 import '../../widgets/auth/otpfeild.dart';
